@@ -23,6 +23,7 @@ dependencies {
 
     // This dependency is used by the application.
     implementation libs.guava
+    implementation 'javazoom:jlayer:1.0.1'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -40,6 +41,9 @@ application {
 jar {
     manifest {
         attributes 'Main-Class': 'Main'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 

@@ -1,3 +1,4 @@
+import javazoom.jl.decoder.JavaLayerException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,22 +10,23 @@ public class CountdownFrame extends JFrame {
 
     protected JLabel countdownLabel;
     protected JLabel textLabel;
-    protected int nextYear = LocalDateTime.now().getYear();
+    protected int nextYear = LocalDateTime.now().getYear() + 1;
+    protected JCheckBox checkBox;
+    protected JLabel funLabel;
 
     public CountdownFrame() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        funLabel = new JLabel(new String("ВЕСЕЛУХА:".getBytes(), StandardCharsets.UTF_8));
         countdownLabel = new JLabel();
+        funLabel.setForeground(Color.RED);
         String text = new String("До Нового года осталось:".getBytes(), StandardCharsets.UTF_8);
         textLabel = new JLabel(text);
+        checkBox = new JCheckBox();
+        checkBox.setSelected(false);
 //        textLabel.setFont(Font.);
         setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.gridx = 0;
-        c.gridy = 0;
-        add(textLabel, c);
-        c.gridx = 0;
-        c.gridy = 2;
-        add(countdownLabel, c);
+        addComponents();
+        configureListeners();
         Thread r = new Thread(this::updateCountdown);
         r.start();
 
@@ -47,6 +49,7 @@ public class CountdownFrame extends JFrame {
                 text = Long.toString(secondsLeft);
             }
             countdownLabel.setText(text);
+            countdownLabel.setForeground(new Color((int)(Math.random() * 255), (int)(Math.random() * 255), (int)(Math.random() * 255)));
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -55,8 +58,36 @@ public class CountdownFrame extends JFrame {
         }
     }
 
+    protected void addComponents() {
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridx = 2;
+        c.gridy = 0;
+        add(funLabel, c);
+        c.gridx = 3;
+        c.gridy = 0;
+        add(checkBox, c);
+        c.gridx = 0;
+        c.gridy = 1;
+        add(textLabel, c);
+        c.gridx = 0;
+        c.gridy = 2;
+        add(countdownLabel, c);
+    }
+
     protected long convertToSeconds(LocalDateTime countdownTill) {
         return countdownTill.toEpochSecond(ZoneOffset.ofHours(3));
+    }
+
+    protected void configureListeners() {
+        checkBox.addActionListener(e -> {
+            if (checkBox.isSelected()) {
+                try {
+                    MusicManager.getInstance().play();
+                } catch (JavaLayerException ex) {
+                    throw new RuntimeException(ex);
+                }
+            } else MusicManager.getInstance().stop();
+        });
     }
 
 }
